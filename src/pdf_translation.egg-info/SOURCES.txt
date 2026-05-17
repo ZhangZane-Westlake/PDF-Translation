@@ -1,0 +1,15 @@
+LICENSE
+README.md
+pyproject.toml
+src/pdf_translation/__init__.py
+src/pdf_translation/cli.py
+src/pdf_translation/extractor.py
+src/pdf_translation/pdf_writer.py
+src/pdf_translation/pipeline.py
+src/pdf_translation/translator.py
+src/pdf_translation.egg-info/PKG-INFO
+src/pdf_translation.egg-info/SOURCES.txt
+src/pdf_translation.egg-info/dependency_links.txt
+src/pdf_translation.egg-info/entry_points.txt
+src/pdf_translation.egg-info/requires.txt
+src/pdf_translation.egg-info/top_level.txt
