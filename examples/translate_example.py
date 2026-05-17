@@ -19,6 +19,7 @@ def main() -> None:
             api_key=api_key,
             base_url=os.getenv("PDF_TRANSLATION_BASE_URL", "https://api.openai.com/v1"),
             model=os.getenv("PDF_TRANSLATION_MODEL", "gpt-4o-mini"),
+            output_mode="bilingual",
         )
     )
 

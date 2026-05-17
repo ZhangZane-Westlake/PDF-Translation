@@ -6,7 +6,7 @@
 
 - 提取英文 PDF 每页文本。
 - 调用 OpenAI 兼容 Chat Completions API 翻译为简体中文。
-- 按页生成中文 PDF，保留页码与段落结构。
+- 按页生成中文 PDF，默认保留原 PDF 页面、图片、表格和公式，并在每页后插入对应中文译文页。
 - 支持 `.env` 配置 API key、base URL、模型和中文字体。
 - 提供命令行入口 `pdf-translate` 和 Python API。
 
@@ -58,12 +58,21 @@ PDF_TRANSLATION_FONT_PATH=
 pdf-translate input.pdf outputs/input.zh.pdf
 ```
 
+默认使用 `bilingual` 模式：完整保留原 PDF 页面，并在每个原页后插入对应中文译文页。
+
+如果只想输出中文译文页：
+
+```bash
+pdf-translate input.pdf outputs/input.zh.pdf --output-mode translation-only
+```
+
 也可以通过命令行覆盖配置：
 
 ```bash
 pdf-translate input.pdf outputs/input.zh.pdf \
   --base-url https://api.openai.com/v1 \
   --model gpt-4o-mini \
+  --output-mode bilingual \
   --font-path /path/to/chinese-font.ttf
 ```
 
@@ -134,6 +143,6 @@ translate_pdf(
 
 ## 注意事项
 
-- PDF 排版重建是重新生成译文 PDF，不会复刻原 PDF 的复杂版式、图片、表格和公式位置。
+- PDF 排版重建的译文页不会复刻原 PDF 的复杂版式；默认 `bilingual` 模式会完整保留原页，并在原页后插入译文页。
 - 长 PDF 会逐页调用模型接口，成本与耗时取决于页数和文本量。
 - 如果翻译质量不符合预期，可以更换模型或调整 `--temperature`。

@@ -51,6 +51,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=0.2,
         help="Model sampling temperature.",
     )
+    parser.add_argument(
+        "--output-mode",
+        choices=("bilingual", "translation-only"),
+        default="bilingual",
+        help="Output mode. bilingual preserves original pages and appends translated pages.",
+    )
     return parser
 
 
@@ -86,6 +92,7 @@ def main() -> None:
             model=arguments.model,
             font_path=arguments.font_path,
             temperature=arguments.temperature,
+            output_mode=arguments.output_mode,
         ),
         progress_callback=_print_progress,
     )

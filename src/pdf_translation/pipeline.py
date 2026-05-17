@@ -3,12 +3,14 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from pdf_translation.extractor import extract_pdf_text
-from pdf_translation.pdf_writer import write_translated_pdf
+from pdf_translation.pdf_writer import write_bilingual_pdf, write_translated_pdf
 from pdf_translation.translator import PdfTranslationClient, TranslationClientConfig
 
 ProgressCallback = Callable[[str], None]
+OutputMode = Literal["translation-only", "bilingual"]
 
 
 @dataclass(frozen=True)
@@ -22,6 +24,7 @@ class PdfTranslationConfig:
     model: str
     font_path: Path | None = None
     temperature: float = 0.2
+    output_mode: OutputMode = "bilingual"
 
 
 def translate_pdf(
@@ -50,11 +53,19 @@ def translate_pdf(
     )
     translated_pages = translation_client.translate_pages(extracted_pages)
     _report_progress(progress_callback, f"Writing translated PDF to {config.output_pdf_path}")
-    write_translated_pdf(
-        translated_pages=translated_pages,
-        output_path=config.output_pdf_path,
-        font_path=config.font_path,
-    )
+    if config.output_mode == "bilingual":
+        write_bilingual_pdf(
+            source_pdf_path=config.input_pdf_path,
+            translated_pages=translated_pages,
+            output_path=config.output_pdf_path,
+            font_path=config.font_path,
+        )
+    else:
+        write_translated_pdf(
+            translated_pages=translated_pages,
+            output_path=config.output_pdf_path,
+            font_path=config.font_path,
+        )
     _report_progress(progress_callback, "Done")
 
 
