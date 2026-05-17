@@ -6,11 +6,15 @@ from pathlib import Path
 from typing import Literal
 
 from pdf_translation.extractor import extract_pdf_text
-from pdf_translation.pdf_writer import write_bilingual_pdf, write_translated_pdf
+from pdf_translation.pdf_writer import (
+    write_bilingual_pdf,
+    write_overlay_pdf,
+    write_translated_pdf,
+)
 from pdf_translation.translator import PdfTranslationClient, TranslationClientConfig
 
 ProgressCallback = Callable[[str], None]
-OutputMode = Literal["translation-only", "bilingual"]
+OutputMode = Literal["translation-only", "bilingual", "overlay"]
 
 
 @dataclass(frozen=True)
@@ -25,6 +29,7 @@ class PdfTranslationConfig:
     font_path: Path | None = None
     temperature: float = 0.2
     output_mode: OutputMode = "bilingual"
+    max_workers: int = 1
 
 
 def translate_pdf(
@@ -48,6 +53,7 @@ def translate_pdf(
             base_url=config.base_url,
             model=config.model,
             temperature=config.temperature,
+            max_workers=config.max_workers,
         ),
         progress_callback=progress_callback,
     )
@@ -55,6 +61,13 @@ def translate_pdf(
     _report_progress(progress_callback, f"Writing translated PDF to {config.output_pdf_path}")
     if config.output_mode == "bilingual":
         write_bilingual_pdf(
+            source_pdf_path=config.input_pdf_path,
+            translated_pages=translated_pages,
+            output_path=config.output_pdf_path,
+            font_path=config.font_path,
+        )
+    elif config.output_mode == "overlay":
+        write_overlay_pdf(
             source_pdf_path=config.input_pdf_path,
             translated_pages=translated_pages,
             output_path=config.output_pdf_path,

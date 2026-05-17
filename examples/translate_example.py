@@ -20,6 +20,7 @@ def main() -> None:
             base_url=os.getenv("PDF_TRANSLATION_BASE_URL", "https://api.openai.com/v1"),
             model=os.getenv("PDF_TRANSLATION_MODEL", "gpt-4o-mini"),
             output_mode="bilingual",
+            max_workers=3,
         )
     )
 

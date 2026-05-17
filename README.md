@@ -8,7 +8,8 @@
 - 调用 OpenAI 兼容 Chat Completions API 翻译为简体中文。
 - 按页生成中文 PDF，默认保留原 PDF 页面、图片、表格和公式，并在每页后插入对应中文译文页。
 - 支持 `.env` 配置 API key、base URL、模型和中文字体。
-- 提供命令行入口 `pdf-translate` 和 Python API。
+- 支持并发翻译，可用 `--max-workers` 同时翻译多页。
+- 支持实验性 `overlay` 模式，尝试用中文译文覆盖原文文本块。
 
 ## 适用范围
 
@@ -55,7 +56,7 @@ PDF_TRANSLATION_FONT_PATH=
 ## 命令行使用
 
 ```bash
-pdf-translate input.pdf outputs/input.zh.pdf
+pdf-translate input.pdf outputs/input.zh.pdf --max-workers 3
 ```
 
 默认使用 `bilingual` 模式：完整保留原 PDF 页面，并在每个原页后插入对应中文译文页。
@@ -65,6 +66,17 @@ pdf-translate input.pdf outputs/input.zh.pdf
 ```bash
 pdf-translate input.pdf outputs/input.zh.pdf --output-mode translation-only
 ```
+
+实验性覆盖原文文本块：
+
+```bash
+pdf-translate input.pdf outputs/input.zh.pdf \
+  --output-mode overlay \
+  --font-path /path/to/chinese-font.ttf \
+  --max-workers 3
+```
+
+`overlay` 模式会复制原 PDF 页面，按提取到的文本块坐标画白色遮罩，再写入中文译文。它能保留图片、表格线条和页面布局，但对多栏论文、复杂公式、旋转文字、透明背景和过长译文可能出现遮挡或溢出。建议提供 `--font-path` 指向中文 TTF/OTF 字体。
 
 也可以通过命令行覆盖配置：
 
@@ -95,6 +107,8 @@ translate_pdf(
         api_key=os.environ["PDF_TRANSLATION_API_KEY"],
         base_url=os.getenv("PDF_TRANSLATION_BASE_URL", "https://api.openai.com/v1"),
         model=os.getenv("PDF_TRANSLATION_MODEL", "gpt-4o-mini"),
+        output_mode="bilingual",
+        max_workers=3,
     )
 )
 ```
@@ -144,5 +158,5 @@ translate_pdf(
 ## 注意事项
 
 - PDF 排版重建的译文页不会复刻原 PDF 的复杂版式；默认 `bilingual` 模式会完整保留原页，并在原页后插入译文页。
-- 长 PDF 会逐页调用模型接口，成本与耗时取决于页数和文本量。
+- 长 PDF 会逐页调用模型接口，成本与耗时取决于页数、文本量和 `--max-workers` 并发数。
 - 如果翻译质量不符合预期，可以更换模型或调整 `--temperature`。

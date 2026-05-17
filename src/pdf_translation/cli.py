@@ -52,8 +52,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Model sampling temperature.",
     )
     parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=1,
+        help="Maximum concurrent translation requests. Use 1 for serial translation.",
+    )
+    parser.add_argument(
         "--output-mode",
-        choices=("bilingual", "translation-only"),
+        choices=("bilingual", "translation-only", "overlay"),
         default="bilingual",
         help="Output mode. bilingual preserves original pages and appends translated pages.",
     )
@@ -83,6 +89,9 @@ def main() -> None:
     if not arguments.api_key:
         parser.error("Missing API key. Set PDF_TRANSLATION_API_KEY or pass --api-key.")
 
+    if arguments.max_workers < 1:
+        parser.error("--max-workers must be greater than or equal to 1.")
+
     translate_pdf(
         PdfTranslationConfig(
             input_pdf_path=arguments.input_pdf,
@@ -93,6 +102,7 @@ def main() -> None:
             font_path=arguments.font_path,
             temperature=arguments.temperature,
             output_mode=arguments.output_mode,
+            max_workers=arguments.max_workers,
         ),
         progress_callback=_print_progress,
     )
