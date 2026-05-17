@@ -51,7 +51,7 @@ PDF_TRANSLATION_FONT_PATH=
 - `PDF_TRANSLATION_API_KEY`：必填，OpenAI 兼容接口密钥。
 - `PDF_TRANSLATION_BASE_URL`：可选，默认 `https://api.openai.com/v1`。
 - `PDF_TRANSLATION_MODEL`：可选，默认 `gpt-4o-mini`。
-- `PDF_TRANSLATION_FONT_PATH`：可选，中文 TTF/OTF 字体路径；未设置时使用 ReportLab 内置中文 CID 字体。
+- `PDF_TRANSLATION_FONT_PATH`：可选，中文 TTF/OTF/TTC 字体路径；未设置时普通译文页使用 ReportLab 内置中文 CID 字体，`overlay` 模式会优先自动查找 macOS 常见中文字体。
 
 ## 命令行使用
 
@@ -72,11 +72,19 @@ pdf-translate input.pdf outputs/input.zh.pdf --output-mode translation-only
 ```bash
 pdf-translate input.pdf outputs/input.zh.pdf \
   --output-mode overlay \
-  --font-path /path/to/chinese-font.ttf \
   --max-workers 3
 ```
 
-`overlay` 模式会复制原 PDF 页面，按提取到的文本块坐标画白色遮罩，再写入中文译文。它能保留图片、表格线条和页面布局，但对多栏论文、复杂公式、旋转文字、透明背景和过长译文可能出现遮挡或溢出。建议提供 `--font-path` 指向中文 TTF/OTF 字体。
+如需指定字体，可传入中文 TTF/OTF/TTC 字体；macOS 可直接使用系统自带的 PingFang：
+
+```bash
+pdf-translate input.pdf outputs/input.zh.pdf \
+  --output-mode overlay \
+  --font-path /System/Library/Fonts/PingFang.ttc \
+  --max-workers 3
+```
+
+`overlay` 模式会复制原 PDF 页面，按提取到的文本块坐标画白色遮罩，再写入中文译文。它能保留图片、表格线条和页面布局，但对多栏论文、复杂公式、旋转文字、透明背景和过长译文可能出现遮挡或溢出。
 
 也可以通过命令行覆盖配置：
 

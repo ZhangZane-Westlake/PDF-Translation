@@ -43,7 +43,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--font-path",
         type=Path,
         default=_optional_path_from_env("PDF_TRANSLATION_FONT_PATH"),
-        help="Optional Chinese-capable TTF/OTF font path.",
+        help="Optional Chinese-capable TTF/OTF/TTC font path.",
     )
     parser.add_argument(
         "--temperature",

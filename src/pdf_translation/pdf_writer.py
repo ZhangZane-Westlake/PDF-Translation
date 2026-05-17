@@ -16,6 +16,13 @@ from pdf_translation.extractor import PdfPageText
 
 _DEFAULT_FONT_NAME = "STSong-Light"
 _CUSTOM_FONT_NAME = "PdfTranslationCjkFont"
+_SUPPORTED_OVERLAY_FONT_SUFFIXES = {".otf", ".ttc", ".ttf"}
+_DEFAULT_OVERLAY_FONT_PATHS = (
+    Path("/System/Library/Fonts/PingFang.ttc"),
+    Path("/System/Library/Fonts/STHeiti Light.ttc"),
+    Path("/System/Library/Fonts/Supplemental/Songti.ttc"),
+    Path("/System/Library/Fonts/Supplemental/Arial Unicode.ttf"),
+)
 
 
 def register_chinese_font(font_path: Path | None) -> str:
@@ -166,8 +173,6 @@ def write_overlay_pdf(
         font_path: Optional path to a Chinese-capable font file.
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    if font_path is None:
-        raise ValueError("overlay mode requires --font-path with a Chinese-capable TTF/OTF font")
     font_file = _resolve_overlay_font_file(font_path)
     translated_pages_by_number = {page.page_number: page for page in translated_pages}
 
@@ -208,20 +213,41 @@ def _overlay_translation_on_page(
         )
 
 
-def _resolve_overlay_font_file(font_path: Path | None) -> str | None:
-    """Resolve an optional font file for PyMuPDF overlay text insertion.
+def _resolve_overlay_font_file(font_path: Path | None) -> str:
+    """Resolve a Chinese-capable font file for PyMuPDF overlay text insertion.
 
     Args:
         font_path: Optional path to a Chinese-capable font file.
 
     Returns:
-        String path for PyMuPDF when configured, otherwise None.
+        String path for PyMuPDF.
     """
-    if font_path is None:
-        return None
+    if font_path is not None:
+        return str(_validate_overlay_font_file(font_path))
+
+    for default_font_path in _DEFAULT_OVERLAY_FONT_PATHS:
+        if default_font_path.exists():
+            return str(default_font_path)
+
+    raise ValueError(
+        "overlay mode requires --font-path with a Chinese-capable TTF/OTF/TTC font"
+    )
+
+
+def _validate_overlay_font_file(font_path: Path) -> Path:
+    """Validate a configured overlay font file path.
+
+    Args:
+        font_path: Path to a Chinese-capable font file.
+
+    Returns:
+        Validated font path.
+    """
     if not font_path.exists():
         raise FileNotFoundError(f"Font file not found: {font_path}")
-    return str(font_path)
+    if font_path.suffix.lower() not in _SUPPORTED_OVERLAY_FONT_SUFFIXES:
+        raise ValueError("overlay font must be a TTF, OTF, or TTC file")
+    return font_path
 
 
 def _split_translation_for_blocks(translated_page: PdfPageText) -> list[str]:
