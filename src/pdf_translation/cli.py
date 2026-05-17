@@ -86,8 +86,18 @@ def main() -> None:
             model=arguments.model,
             font_path=arguments.font_path,
             temperature=arguments.temperature,
-        )
+        ),
+        progress_callback=_print_progress,
     )
+
+
+def _print_progress(message: str) -> None:
+    """Print a safe command-line progress message.
+
+    Args:
+        message: Progress message that does not contain secrets.
+    """
+    print(f"[pdf-translation] {message}", flush=True)
 
 
 if __name__ == "__main__":

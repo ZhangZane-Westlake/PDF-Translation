@@ -113,6 +113,25 @@ translate_pdf(
 └── README.md
 ```
 
+## 排查没有 API 调用的问题
+
+运行命令后应看到类似进度日志：
+
+```text
+[pdf-translation] Extracting text from input.pdf
+[pdf-translation] Extracted text from 12 page(s)
+[pdf-translation] Using model gpt-4o-mini at https://api.openai.com/v1
+[pdf-translation] Requesting translation for page 1 (1/12)
+```
+
+如果没有看到 `Requesting translation`，说明程序还没进入 API 请求阶段。常见原因：
+
+- 没有运行 `pip install -e .`，导致 `pdf-translate` 命令不存在或不是当前项目版本。
+- 输入 PDF 路径不正确。
+- PDF 是扫描版图片，无法提取文本。
+- `.env` 不在当前运行目录，或没有设置 `PDF_TRANSLATION_API_KEY`。
+- `PDF_TRANSLATION_BASE_URL` 配到了不是你正在观察的 API 服务。
+
 ## 注意事项
 
 - PDF 排版重建是重新生成译文 PDF，不会复刻原 PDF 的复杂版式、图片、表格和公式位置。
